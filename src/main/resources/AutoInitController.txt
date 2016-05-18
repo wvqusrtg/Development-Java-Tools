@@ -1,0 +1,500 @@
+//package com.as.controller;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+
+import com.as.model.CheckVersions;//nxs版本检查
+import com.as.model.ClickLike;//nxs自动点赞
+import com.as.model.Contact;//通讯录上传单个人的
+import com.as.model.WxGroupAdd;//通讯录上传群的
+import com.as.model.Devices;//gk终端激活处理类
+import com.as.model.GroupToAdd;//nxs群加好友
+import com.as.model.Letters;//nxs新增获取推送信息类
+import com.as.model.LikeGroupNear;//點贊，群加友，加附近人
+import com.as.model.MessageDeal;//聊天交互
+import com.as.model.NearToAdd;//地理位置定位
+import com.as.model.TaskListNumberToAdd;//QQ/微信/手机号
+import com.as.model.UserLogin;//nxs用户登录
+import com.as.model.UserLoginAndClientActive;//登陸，激活
+import com.jfinal.core.Controller;
+import com.jfinal.kit.HttpKit;
+
+public class AutoInitController extends Controller {
+	// ////////////////////////////启用中的接口//////////////////////////////////////////
+	/**
+	 * 4.8.2. 获取待推送信息（根据ID）结合百度推送autoPush
+	 * http://123.56.165.14:8280/autospread/autoinit/GetWillPushDataByID/
+	 */
+	public void GetWillPushDataByID() {
+		String jsonStr = HttpKit.readIncommingRequestData(getRequest());
+		// jsonStr覆盖用来本地测试android调用接口用,开始也是一个json串方式，其中"SpreadIDs":
+		// "32|43|39"(待推送数据ID集合 101001|101003|101005)
+		// jsonStr
+		// ="{\"req\": {\"MacAddress\": \"84:38:38:6B:9D:B9\",\"AppNo\": \"1.0\",\"SpreadIDs\": \"130552\",\"LocalTime\": \"20151121171916\"}}";
+		String retval = Letters.nxs_letters.GetWillPushDataByID(jsonStr);
+		renderJson(retval);
+	}
+
+	/**
+	 * 4.8.3. 手动获取待推送信息 待推送 type in('0','1','9')的数据
+	 * http://123.56.165.14:8280/autospread/autoinit/GetWillPushData/
+	 */
+	public void GetWillPushData() {
+		String jsonStr = HttpKit.readIncommingRequestData(getRequest());
+		// jsonStr覆盖用来本地测试android调用接口用
+		// as_dev; 70:72:0d:46:b0:70; deviceid:104035
+		// jsonStr =
+		// "{\"req\": {\"MacAddress\": \"70:72:0d:46:67:df\",\"AppNo\": \"1.1.5\",\"LocalTime\": \"20160411161724\"}}";
+		String retval = Letters.nxs_letters.GetWillPushData(jsonStr);
+		renderJson(retval);
+	}
+
+	/**
+	 * 4.8.4.4 android20160119需求 独立出版本更新模块
+	 * http://123.56.165.14:8280/autospread/autoinit/CheckVersion_POST_Login2/
+	 * 
+	 * get：http://123.56.165.14:8280/autospread/autoinit/
+	 * CheckVersion_POST_Login2/0.9 // JFinal官方提供get方式接收数据 // String appVersion
+	 * = getPara(0).trim().toString();//取版本号
+	 */
+	public void CheckVersion_POST_Login2() {
+		String jsonStr = HttpKit.readIncommingRequestData(getRequest());
+		// jsonStr = "{\"req\": {\"AppVersion\": \""+1.0+"\"}}";
+		String retval = CheckVersions.dao.CheckVersion_POST_Login2(jsonStr);
+		renderJson(retval);
+	}
+
+	/**
+	 * 4.8.7. UserLoginAndClientActive
+	 * 
+	 * 1、登录名称（正确与否），密码（正确与否） 2、新设备激活（别名不能和该公司旗下其他设备别名重复） 3、该公司旗下设备总数限制 4、老设备
+	 * 别名问题（是否修改问题） 5、后台强制注销问题
+	 * http://123.56.165.14:8280/autospread/autoinit/UserLoginAndClientActive/
+	 */
+	public void UserLoginAndClientActive() {
+		String jsonStr = HttpKit.readIncommingRequestData(getRequest());
+		// jsonStr="{\"req\":{\"MacAddress\":\"cc:07:e4:be:c1:76\",\"UserName\":\"wangjian\",\"PassWord\":\"000000\",\"ActName\":\"lxout\",\"AppVersion\":\"1.0.2\",\"SysVersion\":\"Lenovo A850+\",\"attrid\":\"01\",\"key\":\"BaiPush\",\"value\":\"4545508713673920486\",\"LocalTime\":\"20151123101208\"}}";
+		String retval = UserLoginAndClientActive.dao
+				.userLoginAndClientActive(jsonStr);
+		renderJson(retval);
+	}
+
+	/**
+	 * 4.9.0. ClickLike 点赞
+	 * http://123.56.165.14:8280/autospread/autoinit/ClickLike/
+	 */
+	public void ClickLike() {
+		String jsonStr = HttpKit.readIncommingRequestData(getRequest());
+		// jsonStr="{\"req\":{\"deviceid\":\"104013\"}}";
+		String retval = ClickLike.dao.ClickLike(jsonStr);
+		renderJson(retval);
+	}
+
+	/**
+	 * 4.9.1. GroupToAdd 群加友
+	 * http://123.56.165.14:8280/autospread/autoinit/GroupToAdd/
+	 */
+	public void GroupToAdd() {
+		String jsonStr = HttpKit.readIncommingRequestData(getRequest());
+		// jsonStr =
+		// "{\"req\":{\"taskid\":\"103251\",\"deviceid\":\"104016\"}}";
+		String retval = GroupToAdd.dao.GroupToAdd(jsonStr);
+		renderJson(retval);
+	}
+
+	/**
+	 * 4.9.2. AddEd '截止目前，已经加好友数量',
+	 * http://123.56.165.14:8280/autospread/autoinit/AddEd/
+	 */
+	public void AddEd() {
+		String jsonStr = HttpKit.readIncommingRequestData(getRequest());
+		// jsonStr
+		// ="{\"req\":{\"taskid\":\"103244\",\"added\":\"90\",\"runstatus\":\"2\"}}";
+		String retval = GroupToAdd.dao.AddEd(jsonStr);
+		renderJson(retval);
+	}
+
+	/**
+	 * 4.9.1. NearToAdd 加附近人
+	 * 
+	 * http://123.56.165.14:8280/autospread/autoinit/NearToAdd/
+	 */
+	public void NearToAdd() {
+		String jsonStr = HttpKit.readIncommingRequestData(getRequest());
+		// jsonStr ="{\"req\":{\"taskid\":\"101423\",\"deviceid\":\"104015\"}}";
+		String retval = NearToAdd.dao.neartoadd(jsonStr);
+		renderJson(retval);
+	}
+
+	/**
+	 * 4.9.2. NearAddEd '截止目前，已经加附近人数量',
+	 * 
+	 * http://123.56.165.14:8280/autospread/autoinit/NearAddEd/
+	 */
+	public void NearAddEd() {
+		String jsonStr = HttpKit.readIncommingRequestData(getRequest());
+		// jsonStr
+		// ="{\"req\":{\"taskid\":\"101423\",\"added\":\"90\",\"runstatus\":\"2\"}}";
+		String retval = NearToAdd.dao.AddEd(jsonStr);
+		renderJson(retval);
+	}
+
+	/**
+	 * 4.9.3. 手动获取待推送信息 C[ClickLike],G[GroupToAdd],N[NearToAdd] (点赞，群加友，加附近人集合)
+	 * 
+	 * http://123.56.165.14:8280/autospread/autoinit/GetWillPushDataCGN/
+	 */
+	public void GetWillPushDataCGN() {
+		String jsonStr = HttpKit.readIncommingRequestData(getRequest());
+		//jsonStr = "{\"req\": {\"MacAddress\": \"20:82:c0:1a:c0:b1\"}}";
+		String retval = LikeGroupNear.nxs_LGN.GetWillPushData(jsonStr);
+		renderJson(retval);
+	}
+
+	/**
+	 * 4.9.4. 手动获取待推送信息 C[ClickLike]
+	 * 
+	 * http://123.56.165.14:8280/autospread/autoinit/GetWillPushDataLike/
+	 */
+	public void GetWillPushDataLike() {
+		String jsonStr = HttpKit.readIncommingRequestData(getRequest());
+		// jsonStr="{\"req\": {\"MacAddress\": \"20:82:c0:1a:c0:b1\"}}";
+		String retval = LikeGroupNear.nxs_LGN.GetWillPushDataLike(jsonStr);
+		renderJson(retval);
+	}
+
+	/**
+	 * 4.9.5. 手动获取待推送信息 G[GroupToAdd]
+	 * 
+	 * http://123.56.165.14:8280/autospread/autoinit/GetWillPushDataGroup/
+	 */
+	public void GetWillPushDataGroup() {
+		String jsonStr = HttpKit.readIncommingRequestData(getRequest());
+		// jsonStr="{\"req\": {\"MacAddress\": \"20:82:c0:1a:c0:b1\"}}";
+		String retval = LikeGroupNear.nxs_LGN.GetWillPushDataGroup(jsonStr);
+		renderJson(retval);
+	}
+
+	/**
+	 * 4.9.6. 手动获取待推送信息 N[NearToAdd]
+	 * 
+	 * http://123.56.165.14:8280/autospread/autoinit/GetWillPushDataNear/
+	 */
+	public void GetWillPushDataNear() {
+		String jsonStr = HttpKit.readIncommingRequestData(getRequest());
+		// jsonStr="{\"req\": {\"MacAddress\": \"20:82:c0:1a:c0:b1\"}}";
+		String retval = LikeGroupNear.nxs_LGN.GetWillPushDataNear(jsonStr);
+		renderJson(retval);
+	}
+
+	/**
+	 * 4.9.7. TaskList 自动获取 http://123.56.165.14:8088/autospread/autoinit/
+	 * GetWillPushDataTaskListByTaskID/
+	 */
+	public void GetWillPushDataTaskListByTaskID() {
+		String jsonStr = HttpKit.readIncommingRequestData(getRequest());
+		// jsonStr = "{\"req\":{\"taskid\":\"123500\"}}";
+		String retval = TaskListNumberToAdd.nxs_TLNTA.TaskListNumberTA(jsonStr);
+		renderJson(retval);
+	}
+
+	/**
+	 * 4.9.8.1 TaskList 手动获取
+	 * http://123.56.165.14:8088/autospread/autoinit/GetWillPushDataTaskList/
+	 */
+	public void GetWillPushDataTaskListByMAC() {
+		String jsonStr = HttpKit.readIncommingRequestData(getRequest());
+		// jsonStr = "{\"req\":{\"MacAddress\":\"38:bc:1a:8e:ba:67\"}}";
+		String retval = TaskListNumberToAdd.nxs_TLNTA
+				.TaskListNumberTA_MAC(jsonStr);
+		renderJson(retval);
+	}
+
+	/**
+	 * 4.9.8.2 TaskList android手动获取一条taskid,和自动推送一样的反馈数据格式
+	 * 数据正确性有保障，但未启用，android测试用了 http://192.168.0.113:8080/autospread/autoinit/
+	 * GetWillPushDataTaskListByMAC_SingleTaskid/
+	 */
+	public void GetWillPushDataTaskListByMAC_SingleTaskid() {
+		String jsonStr = HttpKit.readIncommingRequestData(getRequest());
+		// jsonStr = "{\"req\":{\"MacAddress\":\"38:bc:1a:8e:ba:67\"}}";
+		String retval = TaskListNumberToAdd.nxs_TLNTA
+				.TaskListNumberTA_MAC2(jsonStr);
+		renderJson(retval);
+	}
+
+	/**
+	 * 4.9.9. TaskList 手动获取 '截止目前，已经加附近人数量',回传added
+	 * 
+	 * http://123.56.165.14:8088/autospread/autoinit/TaskListAddEd/
+	 */
+	public void TaskListAddEd() {
+		String jsonStr = HttpKit.readIncommingRequestData(getRequest());
+		// jsonStr="{\"req\":{\"taskid\":\"101423\",\"added\":\"90\"}}";
+		String retval = TaskListNumberToAdd.nxs_TLNTA.TaskListAddEd(jsonStr);
+		renderJson(retval);
+	}
+
+	/**
+	 * 5.0.0. TaskList 手动获取 '截止目前，已经加附近人数量',回传runstatus
+	 * 
+	 * http://123.56.165.14:8088/autospread/autoinit/TaskListRunstatus/
+	 */
+	public void TaskListRunstatus() {
+		String jsonStr = HttpKit.readIncommingRequestData(getRequest());
+		// jsonStr="{\"req\":{\"taskid\":\"101423\",\"runstatus\":\"2\"}}";
+		String retval = TaskListNumberToAdd.nxs_TLNTA
+				.TaskListRunstatus(jsonStr);
+		renderJson(retval);
+	}
+
+	// ///////////////////////////////交互消息处理///////////////////////////////////////
+	/**
+	 * 5.0.1. 接口内容: 将手机采集到的微信用户新增消息发送到服务器
+	 * URL：http://123.56.165.14:8088/autospread/autoinit/MessageAdd/
+	 * Request：{"req"
+	 * :{"MacAddress":"cc:07:e4:be:c1:76","Add":[{"SpreadWxName":"autospread2"
+	 * ,"WxName":"whoami","Message":"uiautomator是黑盒测试工具，它的作用就是模拟用户的动作"}]}}1
+	 * Response：{"Rsp":{"ResultCode":"0","ResultDesc":"成功"}}2 其他说明:
+	 * 插入message表（status=0， direction=0）
+	 * 
+	 */
+	public void MessageAdd() {
+		String jsonStr = HttpKit.readIncommingRequestData(getRequest());
+		// jsonStr =
+		// "{\"req\": {\"MacAddress\": \"70:72:0d:46:b0:70\",\"Add\": [{\"GroupName\": \"family\",\"GroupId\":\"1549307073@chatroom\"\"Msgs\": [{\"SpreadWxName\": \"autospread2\",\"WxName\": \"Whoami\",\"NickName\":\"倪新生\",\"Message\": \"A&time:2016-04-19 10:01:01\n\nB&time:2016-04-20 10:01:01\n\nC&time:2016-04-21 10:01:01\"}]}]}}";
+		String retval = MessageDeal.MESSAGEDE_DEAL.Messageadd(jsonStr);
+		renderJson(retval);
+	}
+
+	/**
+	 * 5.0.2. 接口内容: 将手机采集到的微信用户新增消息发送到服务器
+	 * URL：http://123.56.165.14:8088/autospread/autoinit/MessageSend/
+	 * {"req":{"MacAddress":"cc:07:e4:be:c1:76"}}3
+	 * {"Rsp":{"ResultCode":"0","ResultDesc"
+	 * :"成功","Send":[{"SpreadWxName":"autospread2"
+	 * ,"WxName":"whoami"，"Message":"uiautomator是黑盒测试工具，它的作用就是模拟用户的动作"}]}}4
+	 * 其他说明: 从message表读出数据（status=0， direction=1）并置status=1
+	 */
+	public void MessageSend() {
+		String jsonStr = HttpKit.readIncommingRequestData(getRequest());
+		// jsonStr="{\"req\": {\"MacAddress\": \"20:82:c0:1a:c0:b1\"}}";
+		String retval = MessageDeal.MESSAGEDE_DEAL.Messagesend(jsonStr);
+		renderJson(retval);
+	}
+
+	// 上传测试用 msg2.json脚本在nixs机器上
+	public void MessageAdd2() {
+		String jsonStr = HttpKit.readIncommingRequestData(getRequest());
+		// jsonStr =
+		// "{\"req\": {\"MacAddress\": \"cc:07:e4:be:c1:76\",\"Add\": [{\"GroupName\": \"xxx\",\"People\": [{\"SpreadWxName\": \"autospread2\",\"WxName\": \"wvqusrtg1\",\"Message\": \"A&time:2016-04-19 10:01:01\n\nB&time:2016-04-20 10:01:01\n\nC&time:2016-04-21 10:01:01\"},{\"SpreadWxName\": \"autospread1\",\"WxName\": \"wvqusrtg2\",\"Message\": \"D&time:2016-04-19 10:01:01\n\nE&time:2016-04-20 10:01:01\"}]},{\"GroupName\": \"Android/IOS/Server\",\"People\": [{\"SpreadWxName\": \"autospread4\",\"WxName\": \"wvqusrtg3\",\"Message\": \"F&time:2016-04-19 10:01:01\n\nG&time:2016-04-20 10:01:01\n\nH&time:2016-04-21 10:01:01\"},{\"SpreadWxName\": \"autospread5\",\"WxName\": \"wvqusrtg4\",\"Message\": \"I&time:2016-04-19 10:01:01\n\nJ&time:2016-04-20 10:01:01\n\nK&time:2016-04-21 10:01:01\"},{\"SpreadWxName\": \"autospread3\",\"WxName\": \"wvqusrtg5\",\"Message\": \"L&time:2016-04-19 10:01:01\n\nM&time:2016-04-20 10:01:01\"}]},{\"GroupName\": \"SenparcSDK\",\"People\": [{\"SpreadWxName\": \"autospread2\",\"WxName\": \"wvqusrtg6\",\"Message\": \"N&time:2016-04-19 10:01:01\n\nO&time:2016-04-20 10:01:01\n\nP&time:2016-04-21 10:01:01\"},{\"SpreadWxName\": \"autospread1\",\"WxName\": \"wvqusrtg7\",\"Message\": \"Q&time:2016-04-19 10:01:01\n\nR&time:2016-04-20 10:01:01\"}]}]}}";
+		String filePath = "C:/Users/Administrator/Desktop/2016-04-23/msg3.json";
+		jsonStr = readString3(filePath);
+		System.out.println(jsonStr);
+		System.out.println("拼接好的标准json:" + jsonStr);
+		String retval = MessageDeal.MESSAGEDE_DEAL.Messageadd(jsonStr);
+		renderJson(retval);
+	}
+
+	/* 按字节读取字符串 */
+
+	/* 个人感觉最好的方式，（一次读完）读字节就读字节吧，读完转码一次不就好了 */
+
+	@SuppressWarnings("unused")
+	private static String readString3(String FILE_IN)
+
+	{
+		String str = "";
+		File file = new File(FILE_IN);
+		try {
+			FileInputStream in = new FileInputStream(file);
+			// size 为字串的长度 ，这里一次性读完
+			int size = in.available();
+			byte[] buffer = new byte[size];
+			in.read(buffer);
+			in.close();
+			str = new String(buffer, "utf8");
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return str;
+	}
+
+	/**
+	 * ## 接口 1. 通讯录上传（设备-->接口服务器） > **接口内容**: 将手机中的通讯录上传至服务器 >
+	 * **URL**：`http://123.56.165.14:8280/autospread/autoinit/ContactAdd/` >
+	 * **Request
+	 * **：`{"req":{"MacAddress":"cc:07:e4:be:c1:76","add":[{"username":"xxx",
+	 * "nickname":"xxx", "headpic":"", "updatetime":"2015-1-2 12:12:00"}]}}` >
+	 * **Response**：`{"Rsp":{"ResultCode":"0","ResultDesc":"成功"}}`[^1] [^1]:
+	 * “0”-成功 “-1” = 不成功 > **其他说明**: 插入contact表 ##
+	 */
+	public void ContactAdd() {
+		String jsonStr = HttpKit.readIncommingRequestData(getRequest());
+		// jsonStr="{\"req\": {\"MacAddress\": \"70:72:0d:46:b0:70\",\"spreadwxname\": \"WEIXINID\",
+		//\"Add\":[{\"username\":\"wxid_wcm7e4xaw0eu21\", \"nickname\":\"倪新生\", \"headpic\":\"http://wx.qlogo.cn/mmhead/ver_1/BvkTic70W6eSOkVHFLQybQjJxmcTibkEUFXIdIna9WaiclggXialUYwJmOLUs1icu7dH1KVQia43IYFp1fkdh9Krt2ibQecIiapR6UpG3MPCvLowWCQ/132\",\"updatetime\":\"2015-1-2 12:12:00\"},{\"username\":\"wxid_kfbtw0fufdkd21\", \"nickname\":\"?帆帆、、、帆\", \"headpic\":\"http://wx.qlogo.cn/mmhead/ver_1/ecCxwhAsZq021HibYHxXSIkxpb733aiazgRlYsQo7TXFyDxiavxtyxAr2p6g1dhcnkIUS5TuNcTicGPYCFQWSMgAK4BJYKV5z5LZqYGI0JtYt80/132\",\"updatetime\":\"2015-1-2 12:12:00\"},{\"username\":\"xinliyouzuofen0281\", \"nickname\":\"-  鱼忆七秒°\", \"headpic\":\"http://wx.qlogo.cn/mmhead/ver_1/V4fu9NWzyZ3maVRk0tw0bGvuZAJQo39mOD7XCUzpMdr4f4UsvRQTQfXP3Hj55iaN2vm1oh3Is9yb5oeQToF9jPSXHCCia4OkZ8WumHLXUhn64/132\", \"updatetime\":\"2015-1-2 12:12:00\"}]}}";
+		String retval = Contact.CONTACT_DEAL.ContactAdds(jsonStr);
+		renderJson(retval);
+	}
+
+	/**
+	 * 通讯录上传测试
+	 */
+	public void ContactAdd2() {
+		String jsonStr = HttpKit.readIncommingRequestData(getRequest());
+		String filePath = "C:/Users/Administrator/Desktop/2016-04-23/msg3.json";
+		jsonStr = readString3(filePath);
+		System.out.println(jsonStr);
+		System.out.println("拼接好的标准json:" + jsonStr);
+		String retval = Contact.CONTACT_DEAL.ContactAdds(jsonStr);
+		renderJson(retval);// 把返回值抛出
+		// render("test.jsp");//或者进行页面的跳转
+	}
+
+	/**
+	 * 1. 通讯录上传（设备-->接口服务器） > **接口内容**: 将手机中的通讯录上传至服务器 >
+	 * **URL**：`http://123.56.165.14:8280/autospread/autoinit/WxgroupAdd/` >
+	 * **Request**：`{"req":{"MacAddress":"cc:07:e4:be:c1:76","spreadwxid":"xxx",
+	 * "spreadwxname":"","add":[{"gname":"xxx", "gnickname":"xxx", "members":"",
+	 * "updatetime":"2015-1-2 12:12:00"}]}}` >
+	 * **Response**：`{"Rsp":{"ResultCode":"0","ResultDesc":"成功"}}`[^2] [^2]:
+	 * “0”-成功 “-1” = 不成功 > **其他说明**: 插入contact表
+	 */
+	public void WxgroupAdd() {
+		String jsonStr = HttpKit.readIncommingRequestData(getRequest());
+		// jsonStr="{\"req\": {\"MacAddress\": \"70:72:0d:46:b0:70\",\"spreadwxname\": \"WEIXINID2\",
+		//\"Add\":[{\"gname\":\"groupid\", \"gnickname\":\"groupname\", \"members\":\"wvqusrtg,zhongdi,fanfan\",\"updatetime\":\"2015-1-2 12:12:00\"}]}}";
+		String retval = WxGroupAdd.WXGROUPADD_DEAL.WxgroupAdds(jsonStr);
+		renderJson(retval);
+	}
+
+	public void WxgroupAdd2() {
+		String jsonStr = HttpKit.readIncommingRequestData(getRequest());
+		String filePath = "C:/Users/Administrator/Desktop/2016-04-23/msg3.json";
+		jsonStr = readString3(filePath);
+		System.out.println(jsonStr);
+		System.out.println("拼接好的标准json:" + jsonStr);
+		String retval = WxGroupAdd.WXGROUPADD_DEAL.WxgroupAdds(jsonStr);
+		renderJson(retval);
+		// render("test.jsp");//或者进行页面的跳转
+	}
+	
+	
+	/**
+	 * Spreading表内容推送反馈信息 SpreadFeedBack ## 接口 Spreading表内容推送反馈信息（设备-->接口服务器） >
+	 * **接口内容**: 将手机中的通讯录上传至服务器 >
+	 * **URL**：`http://123.56.165.14:8280/autospread/autoinit/SpreadFeedBack/` >
+	 * **Request**：`{"req":{"spreadid":"XXX","status":"xxx"}}` >
+	 * **Response**：`{"Rsp":{"ResultCode":"0","ResultDesc":"成功"}}`[^1] > [^1]:
+	 * “0”-成功 “-1” = 不成功 > **其他说明**:update spreading表
+	 */
+	public void SpreadFeedBack() {
+		String jsonStr = HttpKit.readIncommingRequestData(getRequest());
+		// jsonStr ="{\"req\":{\"spreadid\":\"130528\",\"status\":\"9\"}}";
+		String retval = Letters.nxs_letters.feedBack(jsonStr);
+		renderJson(retval);
+	}
+
+	// /////////////////////停滞Flowing/////////////////////////
+	public void index() {
+		render("test.jsp");
+	}
+
+	/**
+	 * 4.8.1. 终端激活(停滞)
+	 * http://123.56.165.14:8280/autospread/autoinit/ClientActive/
+	 */
+	public void ClientActive() {
+		String jsonStr = HttpKit.readIncommingRequestData(getRequest());
+		// jsonStr="{\"req\": {\"MacAddress\": \"68:df:dd:c5:65:09\",\"AppVersion\": \"1.0.0\",\"SysVersion\": \"18\",\"UserName\": \"nixinsheng\",\"attrid\":\"01\",\"key\":\"BaiPush\",\"value\":\"3766417717853880907\",\"LocalTime\":\"20151123101208\"}    }";
+		String retval = Devices.dao.save(jsonStr);
+		renderJson(retval);// 把返回值抛出
+		// render("test.jsp");//或者进行页面的跳转
+	}
+
+	/**
+	 * 4.8.4.1 版本检查 post
+	 * http://123.56.165.14:8280/autospread/autoinit/CheckVersion/
+	 */
+	public void CheckVersion_POST() {
+		String jsonStr = HttpKit.readIncommingRequestData(getRequest());
+		// jsonStr="{\"req\": {\"AppVersion\": \"5\"}}";
+		String retval = CheckVersions.dao.CheckVersion(jsonStr);
+		renderJson(retval);
+	}
+
+	/**
+	 * 4.8.4.2 版本检查 get(只能比较整形 旧版本)
+	 * http://123.56.165.14:8280/autospread/autoinit/CheckVersion/
+	 */
+	public void CheckVersion_GET() {
+		// JFinal官方提供get方式接收数据
+		String appVersion = getPara(0).trim().toString();// 取版本号
+		String json = "{\"req\": {\"AppVersion\": \"" + appVersion + "\"}}";
+		String retval = CheckVersions.dao.CheckVersion_GET(json);
+		renderJson(retval);
+	}
+
+	/**
+	 * 4.8.4.3 版本检查 要集成到登录里面(当前版本没有使用)
+	 * http://123.56.165.14:8280/autospread/autoinit/CheckVersion_GET_Login
+	 */
+	public void CheckVersion_GET_Login() {
+		// JFinal官方提供get方式接收数据
+		// String appVersion = getPara(0).trim().toString();//取版本号
+		String appVersion = "0.8";// 模拟android端传来版本号
+		System.out.println("模拟android端传来版本号" + appVersion);
+		// String json = "{\"req\": {\"AppVersion\": \""+appVersion+"\"}}";
+		// JSONObject retval = CheckVersions.dao.CheckVersion_GET_Login(json);
+		String retval = CheckVersions.dao.CheckVersion_GET_Login(appVersion);
+		renderJson(retval);
+	}
+
+	/**
+	 * 4.8.5. 同步推送设备号
+	 */
+	public void SyncPushDeviceNo() {
+		String jsonStr = HttpKit.readIncommingRequestData(getRequest());
+		// String
+		// retval=SyncPushDeviceNumber.nxs_syncPushDeviceNumber.SyncPushDeviceNo(jsonStr);
+		String retval = "开发中。。。";
+		renderJson(retval);
+	}
+
+	/**
+	 * 4.8.6. UserLogin http://10.13.34.159:8080/autospread/autoinit/UserLogin/
+	 */
+	public void UserLogin() {
+		// 设备表里面给android一个状态devicestatus'0:正常激活；1:已注销',(后台需要判断)
+		String jsonStr = HttpKit.readIncommingRequestData(getRequest());
+		// jsonStr="{\"req\": {\"MacAddress\": \"68:df:dd:c5:65:09\",\"UserName\": \"wangjian ibi z pywq\",\"PassWord\": \"000000\"}}";
+		String retval = UserLogin.nxs_userLogin.UserLog(jsonStr);
+		renderJson(retval);
+	}
+
+	/**
+	 * 4.8.8. 根据username type反馈 已经完成，未完成数据
+	 */
+	public void uNameType() {
+		String jsonStr = HttpKit.readIncommingRequestData(getRequest());
+		// jsonStr="{\"req\": {\"UserName\": \"nixinsheng\",\"Type\": \"0\"}}";
+		String retval = Letters.nxs_letters.uNameTypeData(jsonStr);
+		renderJson(retval);
+	}
+
+	/**
+	 * 4.8.9. android Test
+	 */
+	public void nxs_lv() {
+		// 开始也是一个json串方式，其中"sql_SpreadIDs": "32|43|39" 待推送数据ID集合
+		// String jsonStr = HttpKit.readIncommingRequestData(getRequest());
+		// renderJson(jsonStr+"nixinsheng");
+		System.out.println("get方式传参：name=" + getPara(0).toString() + ";age="
+				+ getPara(1).toString());
+		renderText("get方式传参：name=" + getPara(0).toString() + ";age="
+				+ getPara(1).toString());
+	}
+	// /////////////////////停滞Above/////////////////////////
+}
