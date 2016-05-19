@@ -7,10 +7,13 @@
  */
 public class Main {
     public static void main(String[] args) {
-        System.out.println("MainFunction");
+        System.out.println("1.MainFunction");
 
+        String timeStr = "2016-05-19 15:30:00";
+        System.out.println("2."+StringToTime.string2Time(timeStr));
 
-
+        String PATH = "/Users/nixinsheng/Documents/GitHub/Development-Java-Tools/src/main/resources/AutoInitController.txt";
+        System.out.println(DocumentReadToString.readToString(PATH));
 
     }
 }
