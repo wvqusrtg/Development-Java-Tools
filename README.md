@@ -46,8 +46,7 @@
     System.out.println("******执行命令行开始******");
     String[] cmds = {"cd /Users/nixinsheng/","pwd","ls -la"};
     System.out.println(ShellUtils.execCommand(cmds,false,true).successMsg);     
-![Result](https://github.com/wvqusrtg/Development-Java-Tools/blob/master/%E6%88%AA%E5%9B%BE%E8%AE%B0%E5%BD%95/ShellUtils.png?raw=true)
-
+![Result](https://github.com/wvqusrtg/Development-Java-Tools/blob/master/%E6%88%AA%E5%9B%BE%E8%AE%B0%E5%BD%95/ShellUtils1.gif?raw=true)
 ##关于作者
 ```javascript
   Name:nixs(倪新生)
