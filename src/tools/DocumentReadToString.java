@@ -11,7 +11,6 @@ import java.io.IOException;
  */
 public class DocumentReadToString {
     /* 按字节读取字符串 */
-
 	/* 个人感觉最好的方式，（一次读完）读字节就读字节吧，读完转码一次不就好了 */
     /**
      * @Desc 按照指定路径以utf-8读取文件,返回文件内容.
