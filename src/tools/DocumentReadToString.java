@@ -17,7 +17,6 @@ public class DocumentReadToString {
      * Created by nixinsheng on 16/5/18 | 上午11:11.
      */
     public static String readToString(String FILE_IN)
-
     {
         String str = "";
         File file = new File(FILE_IN);
