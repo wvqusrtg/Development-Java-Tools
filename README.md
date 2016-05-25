@@ -45,7 +45,10 @@
     /////////////////////兼容Linux/Unix/Android adb shell/////////////////////////////////////////
     System.out.println("******执行命令行开始******");
     String[] cmds = {"cd /Users/nixinsheng/","pwd","ls -la"};
-    System.out.println(ShellUtils.execCommand(cmds,false,true).successMsg);     
+    System.out.println(ShellUtils.execCommand(cmds,false,true).successMsg);  
+    
+    ###注意：（2016-05-25）String[] cmds里命令一起使用，但是执行顺序有待验证；
+    
 ![Result](https://github.com/wvqusrtg/Development-Java-Tools/blob/master/%E6%88%AA%E5%9B%BE%E8%AE%B0%E5%BD%95/ShellUtils1.gif?raw=true)
 ![Result2](https://github.com/wvqusrtg/Development-Java-Tools/blob/master/%E6%88%AA%E5%9B%BE%E8%AE%B0%E5%BD%95/ShellUtils2.gif?raw=true)
 ##关于作者
